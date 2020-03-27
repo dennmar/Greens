@@ -1,5 +1,9 @@
 import os
+import pathlib
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+   
+db = SQLAlchemy()
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
@@ -9,13 +13,15 @@ def create_app(test_config=None):
     else:
         app.config.from_mapping(test_config)
 
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
+    db.init_app(app)
+    
+    from .routes import user as user_routes
+    app.register_blueprint(user_routes.bp)
 
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World!'
+    from .models import user as user_model
+    # reset and create the initial database
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
 
     return app
