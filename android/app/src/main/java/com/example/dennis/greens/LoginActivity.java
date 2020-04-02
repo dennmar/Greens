@@ -6,28 +6,16 @@ import android.content.Intent;
         import android.view.View;
         import android.widget.Button;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends FragmentDisplayActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity_view);
 
-        Button loginBtn = findViewById(R.id.loginButton);
-        loginBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent greensIntent = new Intent(LoginActivity.this,
-                        GreensActivity.class);
-
-                // prevent back button from going to login
-                greensIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                        Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                        Intent.FLAG_ACTIVITY_NEW_TASK);
-
-                startActivity(greensIntent);
-            }
-        });
+        InitialFragment initFrag = new InitialFragment();
+        getSupportFragmentManager().beginTransaction().
+                add(R.id.loginActFragContainer, initFrag).commit();
     }
 
     @Override
