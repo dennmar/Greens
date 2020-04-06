@@ -14,7 +14,7 @@ def user_view():
         A flask.Response containing a list of all users.
     """
     # NOTE: should have pagination
-    return jsonify([repr(u) for u in user.User.query.all()])
+    return jsonify(users=[repr(u) for u in user.User.query.all()])
 
 @bp.route('/new', methods=['POST'])
 def user_new_view():
@@ -35,4 +35,4 @@ def user_new_view():
     db.session.add(new_user)
     db.session.commit()
 
-    return jsonify(new_user.id)
+    return jsonify(new_id=new_user.id)

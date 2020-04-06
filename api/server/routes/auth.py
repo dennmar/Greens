@@ -27,7 +27,7 @@ def login():
         login_user(matching_user)
         return jsonify(f'Logged in as {username}')
     else:
-        return jsonify('Invalid username or password')
+        return jsonify(result='Invalid username or password')
 
 @bp.route('/logout', methods=['POST'])
 @login_required
@@ -39,4 +39,4 @@ def logout():
     """
     prev_username = current_user.username
     logout_user()
-    return jsonify(f'Logged out of {prev_username}')    
+    return jsonify(result=f'Logged out of {prev_username}')
