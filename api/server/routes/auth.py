@@ -14,8 +14,9 @@ def login():
     Returns:
         A flask.Response describing the result.
     """
-    username = request.form['username']
-    password = request.form['password']
+    request_json = request.get_json()
+    username = request_json['username']
+    password = request_json['password']
 
     if current_user.is_authenticated:
         return jsonify(f'Already logged in as {current_user.username}')

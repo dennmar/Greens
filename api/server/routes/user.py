@@ -23,9 +23,10 @@ def user_new_view():
     Returns:
         A flask.Response containing the ID of the new user.
     """
-    username = request.form['username']
-    email = request.form['email']
-    password = request.form['password']
+    request_json = request.get_json()
+    username = request_json['username']
+    email = request_json['email']
+    password = request_json['password']
     password_hash = user.User.genr_password_hash(password)
     
     # NOTE: need validation and error handling
