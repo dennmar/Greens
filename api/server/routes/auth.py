@@ -19,15 +19,17 @@ def login():
     password = request_json['password']
 
     if current_user.is_authenticated:
-        return jsonify(f'Already logged in as {current_user.username}')
+        return flask.make_response({}, 200)
 
-    # NOTE: need error handling and check if already logged in
+    # NOTE: need error handling
     matching_user = user.User.query.filter_by(username=username).first()
     if matching_user.check_password(password):
         login_user(matching_user)
-        return jsonify(f'Logged in as {username}')
+        response_code = 200
     else:
-        return jsonify(result='Invalid username or password')
+        response_code = 401
+        
+    return flask.make_response({}, response_code)
 
 @bp.route('/logout', methods=['POST'])
 @login_required
@@ -39,4 +41,4 @@ def logout():
     """
     prev_username = current_user.username
     logout_user()
-    return jsonify(result=f'Logged out of {prev_username}')
+    return flask.make_response({}, 200)
