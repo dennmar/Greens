@@ -22,11 +22,14 @@ def create_app(test_config=None):
     # register all routes
     from .routes import user as user_routes
     from .routes import auth as auth_routes
+    from .routes import expense as expense_routes
     app.register_blueprint(user_routes.bp)
     app.register_blueprint(auth_routes.bp)
+    app.register_blueprint(expense_routes.bp)
 
     # reset and create the initial database
     from .models import user as user_model
+    from .models import expense as expense_model
     with app.app_context():
         db.drop_all()
         db.create_all()
