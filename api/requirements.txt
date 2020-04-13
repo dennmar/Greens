@@ -7,3 +7,4 @@ Werkzeug==0.15.5
 Flask-SQLAlchemy==2.4.1
 psycopg2-binary==2.8.4
 flask-jwt-extended==3.24.1
+DateTime==4.3

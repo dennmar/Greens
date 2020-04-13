@@ -18,9 +18,13 @@ def user_view():
     """
     if request.method == 'GET':
         # NOTE: should have pagination
-        users = [repr(u) for u in user.User.query.all()]
+        users = [u.to_dict() for u in user.User.query.all()]
         return flask.make_response({'msg': None, 'users': users}, 200)
     elif request.method == 'POST':
+        if not request.is_json:
+            error_body = {'msg': 'Must be JSON request', 'token': None}
+            return flask.make_response(error_body, 400)
+
         request_json = request.get_json()
         username = request_json['username']
         email = request_json['email']
