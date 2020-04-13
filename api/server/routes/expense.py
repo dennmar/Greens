@@ -1,56 +1,89 @@
 import flask
 from flask import Blueprint, jsonify, request
-from flask_login import login_required, current_user
+from flask_jwt_extended import jwt_required
 
 from .. import db
-from ..models import expense
+from ..models import user, expense
 
-bp = Blueprint('expense', __name__, url_prefix='/expense')
+# NOTE: must re
+bp = Blueprint('expense', __name__, url_prefix='/user/<int:user_id>/expense')
 
 @bp.route('/', methods=['GET', 'POST'])
-@login_required
-def expense_view():
+@jwt_required
+def expense_view(user_id):
     """Find all the user's expenses or store a new expense for the user.
 
     Returns:
         A flask.Response containing all the user's expenses for a GET request
         or containing the id of the created expense for a POST request.
     """
+    resp_body = {}
+    resp_code = 400
+    current_user = user.User.query.get(user_id)
+    
     if request.method == 'GET':
-        user_expenses = [exp.to_dict() for exp in current_user.expenses]
-        return flask.make_response({'expenses': user_expenses}, 200)
+        if current_user is None:
+            resp_body = {'msg': 'Invalid user id', 'expense': None}
+            resp_code = 401
+        else:
+            user_expenses = [exp.to_dict() for exp in current_user.expenses]
+            resp_body = {'msg': None, 'expenses': user_expenses}
+            resp_code = 200
     elif request.method == 'POST':
-        request_json = request.get_json()
-        cost = request_json['cost']
-        description = request_json['description']
+        if current_user is None:
+            resp_body = {'msg': 'Invalid user id', 'created_id': None}
+            resp_code = 401
+        else:
+            request_json = request.get_json()
+            cost = request_json['cost']
+            description = request_json['description']
 
-        # NOTE: need validation and error handling
-        new_expense = expense.Expense(user_id=current_user.id, cost=cost,
-            description=description)
-        db.session.add(new_expense)
-        db.session.commit()
+            # NOTE: need validation and error handling
+            new_expense = expense.Expense(user_id=current_user.id, cost=cost,
+                description=description)
+            db.session.add(new_expense)
+            db.session.commit()
 
-        return flask.make_response({'created_id': new_expense.id}, 200)
+            resp_body = {'msg': None, 'created_id': new_expense.id}
+            resp_code = 200
+    
+    return flask.make_response(resp_body, resp_code)
 
 @bp.route('/<int:expense_id>', methods=['GET', 'PUT', 'DELETE'])
-@login_required
-def specific_expense_view(expense_id):
+@jwt_required
+def specific_expense_view(user_id, expense_id):
     """Return or update a specific expense (that is associated with the user).
 
     Returns:
         A flask.Response describing the result.
     """
-    # NOTE: need error handling and session management
-    exp = expense.Expense.query.filter(expense.Expense.id == expense_id,
-       expense.Expense.user_id == current_user.id).first()
+    resp_body = {}
+    resp_code = 400
+    current_user = user.User.query.get(user_id)
+    exp = None
 
+    # NOTE: need error handling and session management
+    if current_user is None:
+        resp_body['msg'] = 'Invallid user id'
+        resp_code = 401
+    else:
+        exp = expense.Expense.query.filter(expense.Expense.id == expense_id,
+            expense.Expense.user_id == current_user.id).first()
+
+        if exp is None:
+            resp_body['msg'] = 'Invalid expense id'
+            resp_code = 404
+        
     if request.method == 'GET':
-        if exp is not None:
-            return flask.make_response({'expense': exp.to_dict()}, 200)
+        if exp is None:
+            resp_body['expense'] = None
         else:
-            return flask.make_response({'expense': None}, 404)
+            resp_body = {'msg': None, 'expense': exp.to_dict()}
+            resp_code = 200
     elif request.method == 'PUT':
-        if exp is not None:
+        if exp is None:
+            resp_body['updated_id'] = None
+        else:
             request_json = request.get_json()
             cost = request_json['cost']
             description = request_json['description']
@@ -61,13 +94,15 @@ def specific_expense_view(expense_id):
             db.session.merge(exp)
             db.session.commit()
 
-            return flask.make_response({'updated_id': expense_id}, 200)
-        else:
-            return flask.make_response({'updated_id': None}, 404)
+            resp_body = {'msg': None, 'updated_id': expense_id}
+            resp_code = 200
     elif request.method == 'DELETE':
-        if exp is not None:
+        if exp is None:
+            resp_body['deleted_id'] = None
+        else:
             db.session.delete(exp)
             db.session.commit()
-            return flask.make_response({'deleted_id': expense_id}, 200)
-        else:
-            return flask.make_response({'deleted_id': None}, 404)
+            resp_body = {'msg': None, 'deleted_id': expense_id}
+            resp_code = 200
+
+    return flask.make_response(resp_body, resp_code)

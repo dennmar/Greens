@@ -1,44 +1,42 @@
 import flask
 from flask import Blueprint, jsonify, request
-from flask_login import login_user, logout_user, login_required, current_user
+from werkzeug.security import check_password_hash
+from flask_jwt_extended import create_access_token
 
 from .. import db
 from ..models import user
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-@bp.route('/login', methods=['POST'])
+@bp.route('/token', methods=['POST'])
 def login():
-    """Login the user.
+    """Return an access token.
 
     Returns:
-        A flask.Response describing the result.
+        A flask.Response containing an error message and token.
     """
-    request_json = request.get_json()
-    username = request_json['username']
-    password = request_json['password']
-
-    if current_user.is_authenticated:
-        return flask.make_response({}, 200)
-
-    # NOTE: need error handling
-    matching_user = user.User.query.filter_by(username=username).first()
-    if matching_user.check_password(password):
-        login_user(matching_user)
-        response_code = 200
-    else:
-        response_code = 401
+    if not request.is_json:
+        error_body = {'msg': 'Must be JSON request', 'token': None}
+        return flask.make_response(error_body, 400)
         
-    return flask.make_response({}, response_code)
+    request_json = request.get_json()
+    username = request_json.get('username', None)
+    password = request_json.get('password', None)
 
-@bp.route('/logout', methods=['POST'])
-@login_required
-def logout():
-    """Log the user out.
-
-    Returns:
-        A flask.Response describing the result.
-    """
-    prev_username = current_user.username
-    logout_user()
-    return flask.make_response({}, 200)
+    if username is None:
+        error_body = {'msg': 'Missing username', 'token': None}
+        return flask.make_response(error_body, 400)
+    elif password is None:
+        error_body = {'msg': 'Missing password', 'token': None}
+        return flask.make_response(error_body, 400)
+    
+    matching_user = user.User.query.filter_by(username=username).first()
+    auth_password = flask.current_app.config['AUTH_PASSWORD']
+    if username == flask.current_app.config['AUTH_USERNAME'] and \
+            check_password_hash(auth_password, password):
+        # NOTE: should set expiration for token
+        access_token = create_access_token(identity=username)
+        return flask.make_response({'msg': None, 'token': access_token}, 200)
+    else:
+        error_body = {'msg': 'Invalid username or password', 'token': None}
+        return flask.make_response(error_body, 401)

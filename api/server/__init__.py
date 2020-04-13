@@ -2,10 +2,10 @@ import os
 import pathlib
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
+from flask_jwt_extended import JWTManager
 
 db = SQLAlchemy()
-login_manager = LoginManager()
+jwt = JWTManager()
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
@@ -16,8 +16,9 @@ def create_app(test_config=None):
         app.config.from_mapping(test_config)
     
     app.config.update(SECRET_KEY=os.urandom(24))
+    app.config.update(JWT_SECRET_KEY=os.urandom(24))
     db.init_app(app)
-    login_manager.init_app(app)
+    jwt.init_app(app)
     
     # register all routes
     from .routes import user as user_routes
