@@ -11,4 +11,9 @@ public class FragmentDisplayActivity extends AppCompatActivity {
         transaction.addToBackStack(null);
         transaction.commit();
     }
+
+    public void addFragment(int fragContainerId, Fragment frag) {
+        getSupportFragmentManager().beginTransaction().add(fragContainerId,
+                frag).commit();
+    }
 }

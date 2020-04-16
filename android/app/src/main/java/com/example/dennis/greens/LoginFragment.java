@@ -3,6 +3,7 @@ package com.example.dennis.greens;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,26 +42,28 @@ public class LoginFragment extends Fragment {
                 Map<String, String> body = new HashMap();
                 body.put("username", usernameText.getText().toString());
                 body.put("password", passwordText.getText().toString());
-
                 JSONObject postJson = new JSONObject(body);
-                JsonObjectRequest jsonObjRequest = new JsonObjectRequest(
+
+                APIRequest req = new APIRequest(
+                    getContext(),
                     Request.Method.POST,
                     getString(R.string.api_root_url) + "auth/login",
                     postJson,
-                    new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            enterGreens();
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            // TODO: handle error
-                        }
-                    });
+                    true
+                );
 
-                // NOTE: should set retry policy to prevent sending twice
-                ReqQueue.getInstance(getContext()).add(jsonObjRequest);
+                req.send(new ResponseCallback() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        enterGreens();
+                    }
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        String errStr = "submitBtn: " + error.toString();
+                        Log.d("LoginFragment", errStr);
+                    }
+                });
             }
         });
 

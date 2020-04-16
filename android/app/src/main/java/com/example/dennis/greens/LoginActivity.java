@@ -1,10 +1,6 @@
 package com.example.dennis.greens;
 
-import android.content.Intent;
-        import android.support.v7.app.AppCompatActivity;
-        import android.os.Bundle;
-        import android.view.View;
-        import android.widget.Button;
+import android.os.Bundle;
 
 public class LoginActivity extends FragmentDisplayActivity {
 
@@ -13,9 +9,13 @@ public class LoginActivity extends FragmentDisplayActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity_view);
 
+        /**
         InitialFragment initFrag = new InitialFragment();
         getSupportFragmentManager().beginTransaction().
                 add(R.id.loginActFragContainer, initFrag).commit();
+         */
+
+        addFragment(R.id.loginActFragContainer, new InitialFragment());
     }
 
     @Override
