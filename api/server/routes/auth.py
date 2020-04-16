@@ -2,14 +2,14 @@ import flask
 import datetime
 from flask import Blueprint, jsonify, request
 from werkzeug.security import check_password_hash
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required
 
 from .. import db
 from ..models import user
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-@bp.route('/token', methods=['GET'])
+@bp.route('/token', methods=['POST'])
 def token():
     """Return an access token.
 
@@ -42,7 +42,8 @@ def token():
         error_body = {'msg': 'Invalid username or password', 'token': None}
         return flask.make_response(error_body, 401)
 
-@bp.route('/login', methods=['GET'])
+@bp.route('/login', methods=['POST'])
+@jwt_required
 def login():
     """Check if the given username and password are for a valid user.
 

@@ -40,7 +40,7 @@ def user_view():
         resp_body = {'msg': None, 'created_id': new_user.id}
         return flask.make_response(resp_body, 200)
 
-@bp.route('/search/', methods=['GET'])
+@bp.route('/search/', methods=['POST'])
 @jwt_required
 def search_view():
     """Return the user that matches the given username.
