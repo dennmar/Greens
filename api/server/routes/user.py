@@ -36,6 +36,7 @@ def user_view():
             password=password_hash)
         db.session.add(new_user)
         db.session.commit()
+        db.session.close()
 
         resp_body = {'msg': None, 'created_id': new_user.id}
         return flask.make_response(resp_body, 200)

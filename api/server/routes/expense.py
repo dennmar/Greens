@@ -43,6 +43,7 @@ def expense_view(user_id):
                 description=description)
             db.session.add(new_expense)
             db.session.commit()
+            db.session.close()
 
             resp_body = {'msg': None, 'created_id': new_expense.id}
             resp_code = 200
@@ -73,7 +74,7 @@ def specific_expense_view(user_id, expense_id):
         if exp is None:
             resp_body['msg'] = 'Invalid expense id'
             resp_code = 404
-        
+
     if request.method == 'GET':
         if exp is None:
             resp_body['expense'] = None
@@ -93,6 +94,7 @@ def specific_expense_view(user_id, expense_id):
 
             db.session.merge(exp)
             db.session.commit()
+            db.session.close()
 
             resp_body = {'msg': None, 'updated_id': expense_id}
             resp_code = 200
@@ -102,6 +104,8 @@ def specific_expense_view(user_id, expense_id):
         else:
             db.session.delete(exp)
             db.session.commit()
+            db.session.close()
+
             resp_body = {'msg': None, 'deleted_id': expense_id}
             resp_code = 200
 
