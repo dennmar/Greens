@@ -35,4 +35,10 @@ def create_app(test_config=None):
         db.drop_all()
         db.create_all()
 
+        admin_user = user_model.User(username=app.config['ADMIN_USERNAME'], \
+                email='test@test.com', password=app.config['ADMIN_PASSWORD'])
+        db.session.add(admin_user)
+        db.session.commit()
+        db.session.close()
+
     return app

@@ -36,9 +36,10 @@ def user_view():
             password=password_hash)
         db.session.add(new_user)
         db.session.commit()
+        new_user_id = new_user.id
         db.session.close()
 
-        resp_body = {'msg': None, 'created_id': new_user.id}
+        resp_body = {'msg': None, 'created_id': new_user_id}
         return flask.make_response(resp_body, 200)
 
 @bp.route('/search/', methods=['POST'])

@@ -1,6 +1,6 @@
 import flask
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from .. import db
 from ..models import user, expense
@@ -19,11 +19,15 @@ def expense_view(user_id):
     """
     resp_body = {}
     resp_code = 400
-    current_user = user.User.query.get(user_id)
+    username = get_jwt_identity()
+    current_user = user.User.query.filter(user.User.id == user_id,
+            user.User.username == username).first()
     
     if request.method == 'GET':
         if current_user is None:
-            resp_body = {'msg': 'Invalid user id', 'expense': None}
+            resp_body['msg'] = 'Invalid user id provided or access to current ' + \
+                    'user is restricted'
+            resp_body['expenses'] = None
             resp_code = 401
         else:
             user_expenses = [exp.to_dict() for exp in current_user.expenses]
@@ -31,7 +35,9 @@ def expense_view(user_id):
             resp_code = 200
     elif request.method == 'POST':
         if current_user is None:
-            resp_body = {'msg': 'Invalid user id', 'created_id': None}
+            resp_body['msg'] = 'Invalid user id provided or access to current ' + \
+                    'user is restricted'
+            resp_body['created_id'] = None
             resp_code = 401
         else:
             request_json = request.get_json()
@@ -43,9 +49,10 @@ def expense_view(user_id):
                 description=description)
             db.session.add(new_expense)
             db.session.commit()
+            new_expense_id = new_expense.id
             db.session.close()
 
-            resp_body = {'msg': None, 'created_id': new_expense.id}
+            resp_body = {'msg': None, 'created_id': new_expense_id}
             resp_code = 200
     
     return flask.make_response(resp_body, resp_code)
@@ -60,16 +67,19 @@ def specific_expense_view(user_id, expense_id):
     """
     resp_body = {}
     resp_code = 400
-    current_user = user.User.query.get(user_id)
+    username = get_jwt_identity()
+    current_user = user.User.query.filter(user.User.id == user_id,
+            user.User.username == username).first()
     exp = None
 
-    # NOTE: need error handling and session management
+    # NOTE: need error handling
     if current_user is None:
-        resp_body['msg'] = 'Invallid user id'
+        resp_body['msg'] = 'Invalid user id or access to current user is ' + \
+                'restricted'
         resp_code = 401
     else:
         exp = expense.Expense.query.filter(expense.Expense.id == expense_id,
-            expense.Expense.user_id == current_user.id).first()
+                expense.Expense.user_id == current_user.id).first()
 
         if exp is None:
             resp_body['msg'] = 'Invalid expense id'
