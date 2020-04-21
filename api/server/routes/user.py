@@ -1,6 +1,6 @@
 import flask
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_optional, get_jwt_identity
 
 from .. import db
 from ..models import user 
@@ -8,7 +8,7 @@ from ..models import user
 bp = Blueprint('user', __name__, url_prefix='/user')
 
 @bp.route('/', methods=['GET', 'POST'])
-@jwt_required
+@jwt_optional
 def user_view():
     """Return all users or create a new user.
 
@@ -17,6 +17,10 @@ def user_view():
         containing the id of the created user for a POST request.
     """
     if request.method == 'GET':
+        if get_jwt_identity() == None:
+            error_body = {'msg': 'Missing authorization header', 'users': None}
+            return flask.make_response(error_body, 400)
+
         # NOTE: should have pagination
         users = [u.to_dict() for u in user.User.query.all()]
         return flask.make_response({'msg': None, 'users': users}, 200)
@@ -41,30 +45,3 @@ def user_view():
 
         resp_body = {'msg': None, 'created_id': new_user_id}
         return flask.make_response(resp_body, 200)
-
-@bp.route('/search/', methods=['POST'])
-@jwt_required
-def search_view():
-    """Return the user that matches the given username.
-
-    Returns:
-        A flask.Response containing the matching user.
-    """
-    if not request.is_json:
-        error_body = {'msg': 'Must be JSON request', 'token': None}
-        return flask.make_response(error_body, 400)
-
-    request_json = request.get_json()
-    username = request_json.get('username', None)
-
-    if username is None:
-        error_body = {'msg': 'Missing username', 'token': None}
-        return flask.make_response(error_body, 400)
-
-    matching_user = user.User.query.filter_by(username=username).first()
-    if matching_user is not None:
-        resp_body = {'msg': None, 'user': matching_user.to_dict()}
-        return flask.make_response(resp_body, 200)
-    else:
-        resp_body = {'msg': 'Invalid username', 'user': None}
-        return flask.make_response(resp_body, 404)
