@@ -19,7 +19,8 @@ def login():
     Returns:
         A flask.Response describing the result.
     """
-    error_body = {'access_token': None, 'refresh_token': None}
+    error_body = {'access_token': None, 'refresh_token': None,
+            'username': None, 'user_id': None}
 
     if not request.is_json:
         error_body['msg'] = 'Must be JSON request'
@@ -41,7 +42,8 @@ def login():
         access_token = create_access_token(identity=username, fresh=True)
         refresh_token = create_refresh_token(identity=username)
         resp_body = {'msg': None, 'access_token': access_token,
-                'refresh_token': refresh_token}
+                'refresh_token': refresh_token, 'username': username,
+                'user_id': matching_user.id}
         return flask.make_response(resp_body, 200)
     else:
         error_body['msg'] = 'Invalid username or password'
