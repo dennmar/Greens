@@ -71,9 +71,9 @@ public class APIRequest {
                     Map<String, String> headers = new HashMap<>();
                     boolean isPostReq = method == Request.Method.POST;
                     boolean isPutReq = method == Request.Method.PUT;
-                    String token = AccessToken.getInstance(context).getToken();
 
                     if (needToken) {
+                        String token = AccessToken.getInstance(context).getToken();
                         headers.put("Authorization", "Bearer " + token);
                     }
                     if (isPostReq || isPutReq) {

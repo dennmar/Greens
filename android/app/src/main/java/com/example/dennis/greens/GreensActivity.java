@@ -1,13 +1,13 @@
 package com.example.dennis.greens;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 
-public class GreensActivity extends AppCompatActivity {
+public class GreensActivity extends FragmentDisplayActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.greens_activity_view);
+        addFragment(R.id.greensActFragContainer, new ExpenseFragment());
     }
 
     @Override

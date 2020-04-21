@@ -8,13 +8,6 @@ public class LoginActivity extends FragmentDisplayActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity_view);
-
-        /**
-        InitialFragment initFrag = new InitialFragment();
-        getSupportFragmentManager().beginTransaction().
-                add(R.id.loginActFragContainer, initFrag).commit();
-         */
-
         addFragment(R.id.loginActFragContainer, new InitialFragment());
     }
 

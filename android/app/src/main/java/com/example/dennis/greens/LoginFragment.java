@@ -49,12 +49,17 @@ public class LoginFragment extends Fragment {
                     Request.Method.POST,
                     getString(R.string.api_root_url) + "auth/login",
                     postJson,
-                    true
+                    false
                 );
 
                 req.send(new ResponseCallback() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        LoginSession.getInstance(getContext()).setUserInfo(
+                            response.optString("username"),
+                            response.optInt("user_id"),
+                            response.optString("refresh_token")
+                        );
                         enterGreens();
                     }
 
