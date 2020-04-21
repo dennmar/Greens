@@ -20,7 +20,7 @@ public class AccessToken {
 
     private AccessToken(Context ctx) {
         context = ctx;
-        token = null;
+        token = LoginSession.getInstance(context).getAccessToken();
     }
 
     public static synchronized AccessToken getInstance(Context ctx) {
@@ -31,72 +31,37 @@ public class AccessToken {
         return instance;
     }
 
-    private void updateToken(final ResponseCallback callback) {
+    public void refreshAccess(final ResponseCallback callback) {
         Log.v("AccessToken", "updateToken: Updating token");
-        Map<String, String> body = new HashMap();
-        body.put("username",
-                context.getResources().getString(R.string.api_username));
-        body.put("password",
-                context.getResources().getString(R.string.api_password));
-        JSONObject postJson = new JSONObject(body);
 
         APIRequest req = new APIRequest(
-            context,
-            Request.Method.POST,
-            context.getResources().getString(R.string.api_root_url) +
-                "auth/token",
-            postJson,
-            false
+                context,
+                Request.Method.POST,
+                context.getResources().getString(R.string.api_root_url) +
+                        "auth/refresh",
+                null,
+                true,
+                true
         );
 
         req.send(new ResponseCallback() {
             @Override
             public void onResponse(JSONObject response) {
-                token = response.optString("token");
+                token = response.optString("access_token");
+                LoginSession.getInstance(context).setAccessToken(token);
                 callback.onResponse(response);
             }
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("AccessToken", "updateToken(): " + error.toString());
+                String errorMsg = "refreshAccessToken: " + error.toString();
+                Log.d("AccessToken", errorMsg);
                 callback.onErrorResponse(error);
             }
         });
     }
 
-    public String refreshToken(Context ctx, ResponseCallback callback) {
-        instance = new AccessToken(ctx);
-        updateToken(callback);
-
-        return token;
-    }
-
-    public void useToken(ResponseCallback callback) {
-        if (token == null) {
-            updateToken(callback);
-        }
-        else {
-            // create a response using the token
-            Map<String, String> fakeResp = new HashMap();
-            fakeResp.put("token", token);
-            JSONObject tokenJson = new JSONObject(fakeResp);
-            callback.onResponse(tokenJson);
-        }
-    }
-
     public String getToken() {
-        if (token == null) {
-            updateToken(new ResponseCallback() {
-                @Override
-                public void onResponse(JSONObject response) {}
-
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.d("AccessToken", "getToken(): " + error.toString());
-                }
-            });
-        }
-
         return token;
     }
 }

@@ -49,6 +49,7 @@ public class LoginFragment extends Fragment {
                     Request.Method.POST,
                     getString(R.string.api_root_url) + "auth/login",
                     postJson,
+                    false,
                     false
                 );
 
@@ -58,7 +59,8 @@ public class LoginFragment extends Fragment {
                         LoginSession.getInstance(getContext()).setUserInfo(
                             response.optString("username"),
                             response.optInt("user_id"),
-                            response.optString("refresh_token")
+                            response.optString("refresh_token"),
+                            response.optString("access_token")
                         );
                         enterGreens();
                     }

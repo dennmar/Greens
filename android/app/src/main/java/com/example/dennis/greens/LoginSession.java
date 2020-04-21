@@ -2,7 +2,6 @@ package com.example.dennis.greens;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 public class LoginSession {
     private static LoginSession instance;
@@ -24,11 +23,13 @@ public class LoginSession {
         return instance;
     }
 
-    public void setUserInfo(String username, int userId, String refreshToken) {
+    public void setUserInfo(String username, int userId, String refreshToken,
+            String accessToken) {
         SharedPreferences.Editor editor = sharedPrefs.edit();
         editor.putString("username", username);
         editor.putInt("user_id", userId);
-        editor.putString("refreshToken", refreshToken);
+        editor.putString("refresh_token", refreshToken);
+        editor.putString("access_token", accessToken);
         editor.apply();
     }
 
@@ -41,7 +42,15 @@ public class LoginSession {
     }
 
     public String getRefreshToken() {
-        return sharedPrefs.getString("refreshToken", null);
+        return sharedPrefs.getString("refresh_token", null);
+    }
+
+    public String getAccessToken() {
+        return sharedPrefs.getString("access_token", null);
+    }
+
+    public void setAccessToken(String accessToken) {
+        sharedPrefs.edit().putString("access_token", accessToken);
     }
 
     public void close() {

@@ -20,37 +20,40 @@ public class APIRequest {
     private String apiUrl;
     private JSONObject reqBody;
     private boolean needToken;
+    private boolean passRefresh;
 
     public APIRequest(Context ctx, int m, String url, JSONObject body,
-            boolean protectedRoute) {
+            boolean protectedRoute, boolean useRefreshToken) {
         context = ctx;
         method = m;
         apiUrl = url;
         reqBody = body;
         needToken = protectedRoute;
+        passRefresh = useRefreshToken;
     }
 
     public void send(final ResponseCallback callback) {
-        // NOTE: should set retry policy to avoid sending twice
-        if (needToken) {
-            AccessToken.getInstance(context).useToken(new ResponseCallback() {
-                @Override
-                public void onResponse(JSONObject response) {
-                    addRequest(callback);
-                }
-
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.d("APIRequest", error.toString());
-                }
-            });
-        }
-        else {
-            addRequest(callback);
-        }
+        // NOTE: should set retry policy for volley to avoid sending twice
+        boolean retryWithRefresh = needToken && !passRefresh;
+        addRequest(callback, retryWithRefresh);
     }
 
-    private void addRequest(final ResponseCallback callback) {
+    private void resend(final ResponseCallback callback) {
+        AccessToken.getInstance(context).refreshAccess(new ResponseCallback() {
+            @Override
+            public void onResponse(JSONObject response) {
+                addRequest(callback, false);
+            }
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("APIRequest", "resend: " + error.toString());
+            }
+        });
+    }
+
+    private void addRequest(final ResponseCallback callback,
+                            final boolean retryWithRefresh) {
         JsonObjectRequest jsonObjRequest = new JsonObjectRequest(
             method,
             apiUrl,
@@ -64,6 +67,11 @@ public class APIRequest {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     callback.onErrorResponse(error);
+                    // TODO: should only retry if error is for expired token
+                    if (retryWithRefresh) {
+                        Log.v("APIRequest", "addRequest: RESENDING");
+                        resend(callback);
+                    }
                 }
             }) {
                 @Override
@@ -73,7 +81,11 @@ public class APIRequest {
                     boolean isPutReq = method == Request.Method.PUT;
 
                     if (needToken) {
-                        String token = AccessToken.getInstance(context).getToken();
+                        LoginSession sess = LoginSession.getInstance(context);
+                        String token = passRefresh ?
+                                sess.getRefreshToken() :
+                                AccessToken.getInstance(context).getToken();
+
                         headers.put("Authorization", "Bearer " + token);
                     }
                     if (isPostReq || isPutReq) {

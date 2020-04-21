@@ -16,6 +16,9 @@ import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ExpenseFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -27,6 +30,14 @@ public class ExpenseFragment extends Fragment {
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.expense_frag_view,
                 container, false);
+
+        Button expensesBtn = rootView.findViewById(R.id.expensesButton);
+        expensesBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                displayExpenses();
+            }
+        });
 
         Button logoutBtn = rootView.findViewById(R.id.expLogoutButton);
         logoutBtn.setOnClickListener(new View.OnClickListener() {
@@ -54,6 +65,35 @@ public class ExpenseFragment extends Fragment {
                 Intent.FLAG_ACTIVITY_NEW_TASK);
 
         startActivity(logoutIntent);
+    }
+
+    private void displayExpenses() {
+        Map<String, String> body = new HashMap();
+        int userId = LoginSession.getInstance(getContext()).getUserId();
+
+        APIRequest req = new APIRequest(
+                getContext(),
+                Request.Method.GET,
+                getString(R.string.api_root_url) + "user/" + userId +
+                    "/expense",
+                null,
+                true,
+                false
+        );
+
+        req.send(new ResponseCallback() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.v("ExpenseFragment",
+                        response.optJSONArray("expenses").toString());
+            }
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("ExpenseFragment", "displayExpenses: " +
+                        error.toString());
+            }
+        });
     }
 }
 

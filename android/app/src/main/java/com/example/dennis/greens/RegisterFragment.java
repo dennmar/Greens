@@ -55,6 +55,7 @@ public class RegisterFragment extends Fragment {
                     Request.Method.POST,
                     getString(R.string.api_root_url) + "user/",
                     postJson,
+                    false,
                     false
                 );
 
