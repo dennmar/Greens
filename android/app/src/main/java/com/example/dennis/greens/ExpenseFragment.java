@@ -29,6 +29,13 @@ public class ExpenseFragment extends Fragment {
                 container, false);
 
         Button logoutBtn = rootView.findViewById(R.id.expLogoutButton);
+        logoutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LoginSession.getInstance(getContext()).close();
+                exitGreens();
+            }
+        });
 
         return rootView;
     }
@@ -38,7 +45,7 @@ public class ExpenseFragment extends Fragment {
         super.onPause();
     }
 
-    private void logout() {
+    private void exitGreens() {
         Intent logoutIntent = new Intent(getActivity(), LoginActivity.class);
 
         // prevent back button from going to login

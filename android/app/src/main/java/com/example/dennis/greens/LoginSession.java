@@ -45,6 +45,6 @@ public class LoginSession {
     }
 
     public void close() {
-        sharedPrefs.edit().clear();
+        sharedPrefs.edit().clear().commit();
     }
 }
