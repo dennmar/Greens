@@ -47,7 +47,7 @@ public class LoginFragment extends Fragment {
                 APIRequest req = new APIRequest(
                     getContext(),
                     Request.Method.POST,
-                    getString(R.string.api_root_url) + "auth/login",
+                    getString(R.string.api_root_url) + "auth/login/",
                     postJson,
                     false,
                     false

@@ -57,7 +57,7 @@ def expense_view(user_id):
     
     return flask.make_response(resp_body, resp_code)
 
-@bp.route('/<int:expense_id>', methods=['GET', 'PUT', 'DELETE'])
+@bp.route('/<int:expense_id>/', methods=['GET', 'PUT', 'DELETE'])
 @jwt_required
 def specific_expense_view(user_id, expense_id):
     """Return or update a specific expense (that is associated with the user).

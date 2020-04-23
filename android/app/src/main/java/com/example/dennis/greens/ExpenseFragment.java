@@ -75,7 +75,7 @@ public class ExpenseFragment extends Fragment {
                 getContext(),
                 Request.Method.GET,
                 getString(R.string.api_root_url) + "user/" + userId +
-                    "/expense",
+                    "/expense/",
                 null,
                 true,
                 false

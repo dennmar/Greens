@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -33,7 +34,6 @@ public class APIRequest {
     }
 
     public void send(final ResponseCallback callback) {
-        // NOTE: should set retry policy for volley to avoid sending twice
         boolean retryWithRefresh = needToken && !passRefresh;
         addRequest(callback, retryWithRefresh);
     }
@@ -94,6 +94,12 @@ public class APIRequest {
                     return headers;
                 }
             };
+
+        jsonObjRequest.setRetryPolicy(new DefaultRetryPolicy(
+            DefaultRetryPolicy.DEFAULT_TIMEOUT_MS,
+            0,
+            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
 
         ReqQueue.getInstance(context).add(jsonObjRequest);
     }

@@ -38,7 +38,7 @@ public class AccessToken {
                 context,
                 Request.Method.POST,
                 context.getResources().getString(R.string.api_root_url) +
-                        "auth/refresh",
+                        "auth/refresh/",
                 null,
                 true,
                 true

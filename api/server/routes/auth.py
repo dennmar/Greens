@@ -12,7 +12,7 @@ from ..models import user
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-@bp.route('/login', methods=['POST'])
+@bp.route('/login/', methods=['POST'])
 def login():
     """Create an access and refresh token for a user.
 
@@ -49,7 +49,7 @@ def login():
         error_body['msg'] = 'Invalid username or password'
         return flask.make_response(error_body, 401)
 
-@bp.route('/refresh', methods=['POST'])
+@bp.route('/refresh/', methods=['POST'])
 @jwt_refresh_token_required
 def refresh():
     """Create a non-fresh access token from the given refresh token.
@@ -62,7 +62,7 @@ def refresh():
     resp_body = {'msg': None, 'access_token': access_token}
     return flask.make_response(resp_body, 200)
 
-@bp.route('/refresh-login', methods=['POST'])
+@bp.route('/refresh-login/', methods=['POST'])
 def refresh_login():
     """Create a fresh access token for the user.
 
