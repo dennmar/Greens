@@ -10,15 +10,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.gson.JsonObject;
 
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginFragment extends Fragment {
     @Override
@@ -39,36 +35,40 @@ public class LoginFragment extends Fragment {
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Map<String, String> body = new HashMap();
-                body.put("username", usernameText.getText().toString());
-                body.put("password", passwordText.getText().toString());
-                JSONObject postJson = new JSONObject(body);
+                String usernameInput = usernameText.getText().toString();
+                String passwordInput = passwordText.getText().toString();
 
-                APIRequest req = new APIRequest(
-                    getContext(),
-                    Request.Method.POST,
-                    getString(R.string.api_root_url) + "auth/login/",
-                    postJson,
-                    false,
-                    false
-                );
+                JsonObject postJson = new JsonObject();
+                postJson.addProperty("username", usernameInput);
+                postJson.addProperty("password", passwordInput);
 
-                req.send(new ResponseCallback() {
+                DatabaseService service = RestClient.getInstance(getContext())
+                        .getDbService();
+                Call<JsonObject> loginUser = service.login(postJson);
+                loginUser.enqueue(new Callback<JsonObject>() {
                     @Override
-                    public void onResponse(JSONObject response) {
-                        LoginSession.getInstance(getContext()).setUserInfo(
-                            response.optString("username"),
-                            response.optInt("user_id"),
-                            response.optString("refresh_token"),
-                            response.optString("access_token")
-                        );
-                        enterGreens();
+                    public void onResponse(Call<JsonObject> call,
+                            Response<JsonObject> response) {
+                        if (response.code() == 200) {
+                            JsonObject respBody = response.body();
+                            LoginSession.getInstance(getContext()).setUserInfo(
+                                    respBody.get("username").getAsString(),
+                                    respBody.get("user_id").getAsInt(),
+                                    respBody.get("refresh_token").getAsString(),
+                                    respBody.get("access_token").getAsString()
+                            );
+                            enterGreens();
+                        }
+                        else {
+                            String errMsg = "submit: Unexpected code " +
+                                    response.code();
+                            Log.d("LoginFragment", errMsg);
+                        }
                     }
 
                     @Override
-                    public void onErrorResponse(VolleyError error) {
-                        String errStr = "submitBtn: " + error.toString();
-                        Log.d("LoginFragment", errStr);
+                    public void onFailure(Call<JsonObject> call, Throwable t) {
+                        Log.d("LoginFragment", "submit: " + t.toString());
                     }
                 });
             }

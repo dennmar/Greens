@@ -3,13 +3,6 @@ package com.example.dennis.greens;
 import android.content.Context;
 import android.util.Log;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -33,6 +26,7 @@ public class APIRequest {
         passRefresh = useRefreshToken;
     }
 
+    /*
     public void send(final ResponseCallback callback) {
         boolean retryWithRefresh = needToken && !passRefresh;
         addRequest(callback, retryWithRefresh);
@@ -103,4 +97,5 @@ public class APIRequest {
 
         ReqQueue.getInstance(context).add(jsonObjRequest);
     }
+    */
 }

@@ -9,15 +9,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.gson.JsonObject;
 
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ExpenseFragment extends Fragment {
     @Override
@@ -35,7 +31,7 @@ public class ExpenseFragment extends Fragment {
         expensesBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                displayExpenses();
+                showExpenses();
             }
         });
 
@@ -67,31 +63,33 @@ public class ExpenseFragment extends Fragment {
         startActivity(logoutIntent);
     }
 
-    private void displayExpenses() {
-        Map<String, String> body = new HashMap();
-        int userId = LoginSession.getInstance(getContext()).getUserId();
+    private void showExpenses() {
+        LoginSession sess = LoginSession.getInstance(getContext());
+        RestClient restClient = RestClient.getInstance(getContext());
+        int userId = sess.getUserId();
 
-        APIRequest req = new APIRequest(
-                getContext(),
-                Request.Method.GET,
-                getString(R.string.api_root_url) + "user/" + userId +
-                    "/expense/",
-                null,
-                true,
-                false
+        Call<JsonObject> getExpenses = restClient.getDbService().getExpenses(
+                "Bearer " + sess.getAccessToken(),
+                userId
         );
-
-        req.send(new ResponseCallback() {
+        getExpenses.enqueue(new Callback<JsonObject>() {
             @Override
-            public void onResponse(JSONObject response) {
-                Log.v("ExpenseFragment",
-                        response.optJSONArray("expenses").toString());
+            public void onResponse(Call<JsonObject> call,
+                    Response<JsonObject> response) {
+                if (response.code() == 200) {
+                    String expensesStr = response.body().get("expenses")
+                            .getAsJsonArray().toString();
+                    Log.v("ExpenseFragment", "showExpenses: " + expensesStr);
+                }
+                else {
+                    Log.v("ExpenseFragment", "showExpenses: unexpected code "
+                            + response.code());
+                }
             }
 
             @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d("ExpenseFragment", "displayExpenses: " +
-                        error.toString());
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                Log.d("ExpenseFragment", "showExpenses: " + t.toString());
             }
         });
     }

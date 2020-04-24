@@ -1,17 +1,6 @@
 package com.example.dennis.greens;
 
 import android.content.Context;
-import android.util.Log;
-
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class AccessToken {
     private static AccessToken instance;
@@ -31,6 +20,7 @@ public class AccessToken {
         return instance;
     }
 
+    /*
     public void refreshAccess(final ResponseCallback callback) {
         Log.v("AccessToken", "updateToken: Updating token");
 
@@ -60,6 +50,7 @@ public class AccessToken {
             }
         });
     }
+    */
 
     public String getToken() {
         return token;

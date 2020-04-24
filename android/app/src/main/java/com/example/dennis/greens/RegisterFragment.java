@@ -6,21 +6,17 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityEventSource;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class RegisterFragment extends Fragment {
     @Override
@@ -44,38 +40,45 @@ public class RegisterFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 // TODO: add validation
-                Map<String, String> body = new HashMap();
-                body.put("username", usernameText.getText().toString());
-                body.put("email", emailText.getText().toString());
-                body.put("password", passwordText.getText().toString());
-                JSONObject postJson = new JSONObject(body);
+                String usernameInput = usernameText.getText().toString();
+                String emailInput = emailText.getText().toString();
+                String passwordInput = passwordText.getText().toString();
+                String password2Input = password2Text.getText().toString();
 
-                APIRequest req = new APIRequest(
-                    getContext(),
-                    Request.Method.POST,
-                    getString(R.string.api_root_url) + "user/",
-                    postJson,
-                    false,
-                    false
-                );
+                JsonObject postJson = new JsonObject();
+                postJson.addProperty("username", usernameInput);
+                postJson.addProperty("email", emailInput);
+                postJson.addProperty("password", passwordInput);
 
-                req.send(new ResponseCallback() {
+                DatabaseService service = RestClient.getInstance(getContext())
+                        .getDbService();
+                Call<JsonObject> createUser = service.createUser(postJson);
+                createUser.enqueue(new Callback<JsonObject>() {
                     @Override
-                    public void onResponse(JSONObject response) {
-                        FragmentDisplayActivity currActivity =
-                                (FragmentDisplayActivity)getActivity();
-                        currActivity.replaceFragment(
-                            R.id.loginActFragContainer,
-                            new InitialFragment());
+                    public void onResponse(Call<JsonObject> call,
+                            Response<JsonObject> response) {
+                        if (response.code() == 200) {
+                            FragmentDisplayActivity currActivity =
+                                    (FragmentDisplayActivity) getActivity();
+                            currActivity.replaceFragment(
+                                    R.id.loginActFragContainer,
+                                    new InitialFragment()
+                            );
+                        }
+                        else {
+                            String errMsg = "submit: Unexpected code " +
+                                    response.code();
+                            Log.d("RegisterFragment", errMsg);
+                        }
                     }
 
                     @Override
-                    public void onErrorResponse(VolleyError error) {
-                        String errStr = "submitBtn: " + error.toString();
-                        Log.d("RegisterFragment", errStr);
+                    public void onFailure(Call<JsonObject> call,
+                            Throwable t) {
+                        Log.d("RegisterFragment", "submit: " + t.toString());
                     }
                 });
-           }
+            }
         });
 
         return rootView;

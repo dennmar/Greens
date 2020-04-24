@@ -7,8 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.android.volley.VolleyLog;
-
 public class InitialFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
