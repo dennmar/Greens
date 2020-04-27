@@ -15,18 +15,45 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * The fragment that displays the register form to the user.
+ */
 public class RegisterFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
+    /**
+     * Instantiate the user interface view and set on-click listeners for buttons.
+     *
+     * @param inflater           the layout inflater to inflate views
+     * @param container          the parent view to attach to
+     * @param savedInstanceState the previously saved state of the fragment
+     * @return the view for the user interface
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.register_frag_view,
                 container, false);
 
+        setSubmitListener(rootView);
+
+        return rootView;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    /**
+     * Set an on-click listener for the submit button to register a new user
+     *
+     * @param rootView the view for the user interface
+     */
+    private void setSubmitListener(View rootView) {
         final EditText usernameText = rootView.findViewById(R.id.registerUsernameText);
         final EditText emailText = rootView.findViewById(R.id.registerEmailText);
         final EditText passwordText = rootView.findViewById(R.id.registerPasswordText);
@@ -53,7 +80,7 @@ public class RegisterFragment extends Fragment {
                 createUser.enqueue(new Callback<JsonObject>() {
                     @Override
                     public void onResponse(Call<JsonObject> call,
-                            Response<JsonObject> response) {
+                                           Response<JsonObject> response) {
                         if (response.code() == 200) {
                             FragmentDisplayActivity currActivity =
                                     (FragmentDisplayActivity) getActivity();
@@ -71,7 +98,7 @@ public class RegisterFragment extends Fragment {
 
                     @Override
                     public void onFailure(Call<JsonObject> call,
-                            Throwable t) {
+                                          Throwable t) {
                         StackTraceElement[] st = t.getStackTrace();
                         Log.d("RegisterFragment", "submit: " + t.toString());
                         for (int i = 0; i < st.length; i++) {
@@ -81,12 +108,5 @@ public class RegisterFragment extends Fragment {
                 });
             }
         });
-
-        return rootView;
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
     }
 }

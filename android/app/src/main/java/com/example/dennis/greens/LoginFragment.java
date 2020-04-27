@@ -16,18 +16,45 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * The fragment that displays the login form to the user.
+ */
 public class LoginFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
+    /**
+     * Instantiate the user interface view and set on-click listeners for buttons.
+     *
+     * @param inflater           the layout inflater to inflate views
+     * @param container          the parent view to attach to
+     * @param savedInstanceState the previously saved state of the fragment
+     * @return the view for the user interface
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.login_frag_view,
                 container, false);
 
+        setSubmitListener(rootView);
+
+        return rootView;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    /**
+     * Set an on-click listener for the submit button to login the user.
+     *
+     * @param rootView the view for the user interface
+     */
+    private void setSubmitListener(View rootView) {
         final EditText usernameText = rootView.findViewById(R.id.loginUsernameText);
         final EditText passwordText = rootView.findViewById(R.id.loginPasswordText);
 
@@ -48,7 +75,7 @@ public class LoginFragment extends Fragment {
                 loginUser.enqueue(new Callback<JsonObject>() {
                     @Override
                     public void onResponse(Call<JsonObject> call,
-                            Response<JsonObject> response) {
+                                           Response<JsonObject> response) {
                         if (response.code() == 200) {
                             JsonObject respBody = response.body();
                             LoginSession.getInstance(getContext()).setUserInfo(
@@ -77,15 +104,11 @@ public class LoginFragment extends Fragment {
                 });
             }
         });
-
-        return rootView;
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
+    /**
+     * Redirect the user to the main activity.
+     */
     private void enterGreens() {
         Intent greensIntent = new Intent(getActivity(), GreensActivity.class);
 
