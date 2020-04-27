@@ -11,9 +11,6 @@ import android.widget.EditText;
 
 import com.google.gson.JsonObject;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -50,8 +47,8 @@ public class RegisterFragment extends Fragment {
                 postJson.addProperty("email", emailInput);
                 postJson.addProperty("password", passwordInput);
 
-                DatabaseService service = RestClient.getInstance(getContext())
-                        .getDbService();
+                APIService service = RestClient.getInstance(getContext())
+                        .getAPIService();
                 Call<JsonObject> createUser = service.createUser(postJson);
                 createUser.enqueue(new Callback<JsonObject>() {
                     @Override
@@ -75,7 +72,11 @@ public class RegisterFragment extends Fragment {
                     @Override
                     public void onFailure(Call<JsonObject> call,
                             Throwable t) {
+                        StackTraceElement[] st = t.getStackTrace();
                         Log.d("RegisterFragment", "submit: " + t.toString());
+                        for (int i = 0; i < st.length; i++) {
+                            Log.d("RegisterFragment", st[i].toString());
+                        }
                     }
                 });
             }

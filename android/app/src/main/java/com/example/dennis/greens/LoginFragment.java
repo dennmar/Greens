@@ -42,8 +42,8 @@ public class LoginFragment extends Fragment {
                 postJson.addProperty("username", usernameInput);
                 postJson.addProperty("password", passwordInput);
 
-                DatabaseService service = RestClient.getInstance(getContext())
-                        .getDbService();
+                APIService service = RestClient.getInstance(getContext())
+                        .getAPIService();
                 Call<JsonObject> loginUser = service.login(postJson);
                 loginUser.enqueue(new Callback<JsonObject>() {
                     @Override
@@ -68,7 +68,11 @@ public class LoginFragment extends Fragment {
 
                     @Override
                     public void onFailure(Call<JsonObject> call, Throwable t) {
+                        StackTraceElement[] st = t.getStackTrace();
                         Log.d("LoginFragment", "submit: " + t.toString());
+                        for (int i = 0; i < st.length; i++) {
+                            Log.d("LoginFragment", st[i].toString());
+                        }
                     }
                 });
             }

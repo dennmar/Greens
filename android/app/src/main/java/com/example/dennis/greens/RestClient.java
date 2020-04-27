@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RestClient {
     private static RestClient instance;
     private static Context context;
-    private DatabaseService dbService;
+    private APIService dbService;
 
     private RestClient(Context ctx) {
         context = ctx;
@@ -17,7 +17,7 @@ public class RestClient {
                 .baseUrl(url)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        dbService = retrofit.create(DatabaseService.class);
+        dbService = retrofit.create(APIService.class);
     }
 
     public static synchronized RestClient getInstance(Context ctx) {
@@ -28,7 +28,7 @@ public class RestClient {
         return instance;
     }
 
-    public DatabaseService getDbService() {
+    public APIService getAPIService() {
         return dbService;
     }
 }

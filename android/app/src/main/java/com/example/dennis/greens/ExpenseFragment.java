@@ -68,7 +68,7 @@ public class ExpenseFragment extends Fragment {
         RestClient restClient = RestClient.getInstance(getContext());
         int userId = sess.getUserId();
 
-        Call<JsonObject> getExpenses = restClient.getDbService().getExpenses(
+        Call<JsonObject> getExpenses = restClient.getAPIService().getExpenses(
                 "Bearer " + sess.getAccessToken(),
                 userId
         );
@@ -79,7 +79,7 @@ public class ExpenseFragment extends Fragment {
                 if (response.code() == 200) {
                     String expensesStr = response.body().get("expenses")
                             .getAsJsonArray().toString();
-                    Log.v("ExpenseFragment", "showExpenses: " + expensesStr);
+                    Log.v("ExpenseFragment", "showExpenses: " + expensesStr.toString());
                 }
                 else {
                     Log.v("ExpenseFragment", "showExpenses: unexpected code "
@@ -89,7 +89,11 @@ public class ExpenseFragment extends Fragment {
 
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
+                StackTraceElement[] st = t.getStackTrace();
                 Log.d("ExpenseFragment", "showExpenses: " + t.toString());
+                for (int i = 0; i < st.length; i++) {
+                    Log.d("ExpenseFragment", st[i].toString());
+                }
             }
         });
     }
