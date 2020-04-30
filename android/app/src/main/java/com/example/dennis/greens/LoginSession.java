@@ -2,6 +2,12 @@ package com.example.dennis.greens;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
+
+import com.auth0.android.jwt.DecodeException;
+import com.auth0.android.jwt.JWT;
+
+import java.util.Date;
 
 /**
  * The singleton session for the currently logged in user.
@@ -98,6 +104,35 @@ public class LoginSession {
      */
     public void setAccessToken(String accessToken) {
         sharedPrefs.edit().putString("access_token", accessToken);
+    }
+
+    /**
+     * Check whether the user is currently logged in.
+     *
+     * @return true if the user is logged in; false otherwise
+     */
+    public boolean isLoggedIn() {
+        if (getUsername() == null) {
+            return false;
+        }
+
+        // check if the refresh token is expired
+        try {
+            JWT jwt = new JWT(getRefreshToken());
+            Date currDate = new Date();
+            Date expiration = jwt.getExpiresAt();
+
+            if (currDate.after(expiration) || currDate.equals(expiration)) {
+                close();
+                return false;
+            }
+        }
+        catch (DecodeException exception) {
+            Log.v("LoginSession", "isLoggedIn: " + exception.toString());
+            return false;
+        }
+
+        return true;
     }
 
     /**

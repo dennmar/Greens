@@ -1,5 +1,6 @@
 package com.example.dennis.greens;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -30,8 +31,13 @@ public class InitialFragment extends Fragment {
         final View rootView = inflater.inflate(R.layout.initial_frag_view,
                 container, false);
 
-        setLoginListener(rootView);
-        setRegisterListener(rootView);
+        if (LoginSession.getInstance(getContext()).isLoggedIn()) {
+            enterGreens();
+        }
+        else {
+            setLoginListener(rootView);
+            setRegisterListener(rootView);
+        }
 
         return rootView;
     }
@@ -77,5 +83,19 @@ public class InitialFragment extends Fragment {
                         new RegisterFragment());
             }
         });
+    }
+
+    /**
+     * Redirect the user to the main activity.
+     */
+    private void enterGreens() {
+        Intent greensIntent = new Intent(getActivity(), GreensActivity.class);
+
+        // prevent back button from going to login
+        greensIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        startActivity(greensIntent);
     }
 }
